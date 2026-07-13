@@ -1,5 +1,9 @@
 # Battery Life Prediction — Physics-Based Inverse + Operator Learning
 
+[![tests](https://github.com/gggg8657/battery-rul/actions/workflows/tests.yml/badge.svg)](https://github.com/gggg8657/battery-rul/actions/workflows/tests.yml)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 Physics-grounded remaining-useful-life (RUL) and end-of-life (EOL) prediction
 for LFP (lithium iron phosphate) cells, using **open cycling datasets**.
 
