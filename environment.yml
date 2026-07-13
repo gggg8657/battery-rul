@@ -1,0 +1,22 @@
+name: pybamm-inv
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - jupyter
+  - tqdm
+  - pyyaml
+  - h5py
+  - pip:
+    - pybamm
+    - pybop
+    - beep
+    - torch
+    - scikit-learn
+    - h5py

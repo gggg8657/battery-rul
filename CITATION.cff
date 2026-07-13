@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Battery Life Prediction — Physics-Based Inverse + Operator Learning"
+abstract: >-
+  Physics-grounded remaining-useful-life and end-of-life prediction for LFP
+  cells: PyBaMM SPM inverse for identifiable physical parameters, a
+  protocol-conditioned DeepONet operator for capacity-fade trajectories, and a
+  GMM density boundary that flags out-of-distribution inputs. Trained and
+  evaluated on open cycling datasets.
+type: software
+authors:
+  - family-names: Kim
+    given-names: DongJu
+    affiliation: "Korea Atomic Energy Research Institute (KAERI)"
+repository-code: "https://github.com/gggg8657/battery-rul"
+license: MIT
+date-released: "2026-07-13"
+keywords:
+  - battery
+  - lithium-iron-phosphate
+  - remaining-useful-life
+  - physics-informed
+  - operator-learning
+  - deeponet
+  - pybamm

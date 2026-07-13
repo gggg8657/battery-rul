@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Data & model artifacts
+*.npz
+*.pt
+*.pkl
+*.h5
+*.mat
+data/raw/
+data/processed/
+data/synthetic/
+results/
+
+# Reports & binaries
+*.pptx
+*.pdf
+*.zip
+
+# Environment / OS / IDE
+.env
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

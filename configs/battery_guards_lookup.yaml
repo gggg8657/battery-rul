@@ -1,0 +1,116 @@
+# Battery Guards Lookup Table
+# Source: PROMPT_PYBAMM_INVERSE_EXAMPLE.md §3 (BATT-H-01~09)
+# 기반 검증 데이터: configs/A123_Prada2013_hybrid.yaml,
+#               configs/A123_Hybrid_Chen2020_calibrated.yaml,
+#               results/hybrid_pv_calibrated_validation.json
+# 생성일: 2026-05-11
+
+phase0_calibration:
+  source: configs/A123_Prada2013_hybrid.yaml
+  # Phase 0 TRI batch1_cell5 cycle1 기준 (BATT-H-01 정답 값)
+  capacity_1C_Ah: 0.927
+  capacity_4C_Ah: 0.961
+  # HUST 문서 기반 EOL (-2.6%)
+  EOL_cycle_simulated: 1046
+  EOL_cycle_measured: 1074
+  tolerance:
+    # GATE-C: 1C ∈ [0.90, 0.95], 4C ∈ [0.93, 1.00]
+    # hybrid_pv_calibrated_validation.json pass_criteria 기준
+    capacity_1C: [0.90, 0.96]
+    capacity_4C: [0.93, 1.00]
+
+c_rate_a123:
+  # A123 APR18650M1A, 공칭 1.1 Ah (BATT-H-06 기준)
+  cell_model: A123_APR18650M1A
+  nominal_capacity_Ah: 1.1
+  one_c_current_A: 1.1
+  four_c_current_A: 4.4
+  # 허용 오차: ±5%
+  current_tolerance_pct: 5.0
+
+hybrid_pv_validation:
+  # Source: results/hybrid_pv_calibrated_validation.json (after_calibration)
+  source: configs/A123_Hybrid_Chen2020_calibrated.yaml
+  capacity_1C_Ah: 0.9516
+  capacity_4C_Ah: 0.9361
+  pass_range_1C: [0.90, 0.96]
+  pass_range_4C: [0.93, 1.00]
+  ratio_4C_over_1C_min: 0.95
+
+theta_3_bounds_safe:
+  # Phase 1 실측 θ 분포 포함 범위 (BATT-H-03 기준)
+  # 실측 TRI: SoC [0.831, 0.904], eps_neg [0.521, 0.567], eps_pos=0.55 (boundary)
+  # 명세 기준 안전 범위 (PROMPT_PYBAMM_INVERSE_EXAMPLE.md §1)
+  SoC: [0.60, 1.00]
+  eps_neg: [0.20, 0.70]
+  eps_pos: [0.20, 0.60]
+
+# Phase 1 식별불가능성 기준 (BATT-H-02)
+phase1_identifiability:
+  # TRI 46셀 역산 결과 eps_pos = 0.55 (std=0.0) → 실질 2D
+  eps_pos_std_threshold: 0.01
+  eps_neg_std_threshold: 0.001
+  soc_std_threshold: 0.001
+
+required_sei_keys:
+  # Chen2020/OKane2022에서 import 필요한 10개 SEI 파라미터 (BATT-H-07)
+  - "SEI kinetic rate constant [m.s-1]"
+  - "EC initial concentration in electrolyte [mol.m-3]"
+  - "SEI growth activation energy [J.mol-1]"
+  - "SEI open-circuit potential [V]"
+  - "SEI resistivity [Ohm.m]"
+  - "SEI partial molar volume [m3.mol-1]"
+  - "SEI molar mass [kg.mol-1]"
+  - "Initial outer SEI thickness [m]"
+  - "Initial inner SEI thickness [m]"
+  - "SEI lithium ion conductivity [S.m-1]"
+
+# BATT-H-08: TRI vs HUST 분포 차이 기준
+dataset_distribution:
+  # TRI batch1 (n=46 cycle10): mean=845, std=183
+  tri_cycle_life_mean: 845
+  tri_cycle_life_std: 183
+  # HUST (n=32 cycle10): mean=1899, std=451
+  hust_cycle_life_mean: 1899
+  hust_cycle_life_std: 451
+  # KS test p<0.05 → domain shift 경고
+  ks_pvalue_threshold: 0.05
+
+# BATT-H-10: 일반화 domain shift 감지 (임의 두 분포)
+batt_h_10_domain_shift:
+  # KS 2-sample test p-value 임계값
+  default_ks_p_threshold: 0.05
+
+# BATT-H-11: Extrapolation 경고 (convex hull)
+batt_h_11_extrapolation:
+  # hull 확장 비율 (0.05 = 5%). 외삽 허용 마진.
+  default_tolerance: 0.05
+
+# BATT-H-12: Best epoch 조기 stop 경고
+batt_h_12_best_epoch:
+  # best_epoch / total_epochs 최소 비율
+  # 미달 시 조기 수렴 의심 (P7-B v2: 8/200=4% 사례)
+  default_min_ratio: 0.1
+
+# BATT-H-13: SHAP value sign consistency
+batt_h_13_shap_sign:
+  # 동일 셀에 대해 random seed 변경 시 SHAP sign 일관성 기준
+  # 음수/양수 비율 변동 허용 범위: 10% 이내
+  max_sign_ratio_variation: 0.10
+
+# BATT-H-14: MMD threshold trigger
+batt_h_14_mmd:
+  # Two-sample MMD 임계값: MMD >= tau → DA(domain adaptation) 자동 트리거
+  mmd_tau: 0.1
+
+# BATT-H-15: Counterfactual monotonicity
+batt_h_15_counterfactual:
+  # counterfactual θ 증가에 따른 EOL 변화 sign 일관성 허용 위반 비율
+  # 예: 90%가 동일 sign이어야 함 → max_violation_ratio=0.10
+  max_violation_ratio: 0.10
+
+# BATT-H-16: TTT update stability
+batt_h_16_ttt_stability:
+  # Test-time training 후 L2 norm 상대 변화 허용 임계값
+  # ||θ_after - θ_before||_2 / ||θ_before||_2 < max_rel_change
+  max_rel_change: 0.05
