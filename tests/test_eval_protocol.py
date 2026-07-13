@@ -1,8 +1,25 @@
 import math
 
-from src.eval_protocol import build_split_manifest, mape, rmse, rul_error
+import pytest
+
+from src.eval_protocol import (
+    build_split_manifest,
+    discover_cells,
+    mape,
+    rmse,
+    rul_error,
+)
+
+# Dataset label files (data/*_labels) are NOT bundled in this public showcase.
+# Tests that need them skip cleanly; run inside the full data repo to exercise them.
+_HAS_LABELS = any(discover_cells().values())
+_needs_data = pytest.mark.skipif(
+    not _HAS_LABELS,
+    reason="dataset label files not bundled in this public showcase",
+)
 
 
+@_needs_data
 def test_v7_split_manifest_has_required_modes_and_disjoint_splits():
     manifest = build_split_manifest(seed=42)
     split_names = {split["name"] for split in manifest["splits"]}
@@ -21,6 +38,7 @@ def test_v7_split_manifest_has_required_modes_and_disjoint_splits():
     assert manifest["datasets"]["calce_a123"]["n_cells"] >= 1
 
 
+@_needs_data
 def test_calce_is_sanity_only():
     manifest = build_split_manifest(seed=42)
     calce = next(split for split in manifest["splits"] if split["name"] == "calce_sanity")

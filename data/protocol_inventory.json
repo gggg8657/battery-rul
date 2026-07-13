@@ -1,0 +1,317 @@
+{
+  "schema_version": "v7_protocol_inventory_2026-05-21",
+  "purpose": "Protocol feature inventory for protocol-conditioned LFP lifetime modeling.",
+  "target_leakage_policy": {
+    "eol_definition": "excluded_from_model_inputs",
+    "cycle_life": "excluded_from_model_inputs",
+    "rul": "excluded_from_model_inputs"
+  },
+  "feature_schema": {
+    "physical_numeric_features": [
+      "charge_c_rate_stage1",
+      "charge_soc_switch_fraction",
+      "charge_c_rate_stage2",
+      "discharge_c_rate_stage1",
+      "discharge_c_rate_stage2",
+      "discharge_c_rate_stage3",
+      "temperature_C",
+      "depth_of_discharge_fraction",
+      "nominal_capacity_Ah",
+      "voltage_min_V",
+      "voltage_max_V"
+    ],
+    "physical_categorical_features": {
+      "charge_rule": [
+        "two_step_fast_charge_cc",
+        "constant_current",
+        "unknown"
+      ],
+      "discharge_rule": [
+        "constant_current",
+        "multi_stage_constant_current",
+        "unknown"
+      ],
+      "form_factor": [
+        "18650",
+        "26650",
+        "unknown"
+      ]
+    },
+    "dataset_identity": [
+      "tri_severson",
+      "hust_ma",
+      "calce_a123"
+    ],
+    "encoding_notes": [
+      "Physical protocol features and dataset identity are encoded separately.",
+      "Each physical numeric feature is emitted as value plus an is_known mask.",
+      "Unknown numeric values are encoded as 0.0 with mask 0.0.",
+      "Not-applicable stage values are encoded as 0.0 with mask 0.0 and are tracked separately from unknown metadata in this inventory.",
+      "EOL definitions and cycle_life are evaluation metadata only and are never included in model vectors."
+    ]
+  },
+  "datasets": {
+    "tri_severson": {
+      "display_name": "Toyota Research Institute / Severson 2019",
+      "source_files": [
+        "configs/datasets.yaml",
+        "src/download_tri_data.py",
+        "configs/param_ranges.yaml",
+        "src/residual_features.py",
+        "data/fixed_d_labels/*_cycle*.json"
+      ],
+      "n_cells_inventory": 94,
+      "chemistry": "LFP / graphite",
+      "cell_model": "A123 APR18650M1A",
+      "form_factor": "18650",
+      "nominal_capacity_Ah": {
+        "value": 1.1,
+        "status": "known"
+      },
+      "voltage_window_V": {
+        "min": 2.0,
+        "max": 3.6,
+        "status": "known"
+      },
+      "temperature_C": {
+        "value": 30.0,
+        "status": "known"
+      },
+      "charge": {
+        "rule": "two_step_fast_charge_cc",
+        "c_rate_stage1": {
+          "value": null,
+          "status": "cell_specific_from_charge_policy",
+          "parser": "src.residual_features.parse_charge_policy",
+          "example": "4.4C(55%)-6C"
+        },
+        "soc_switch_fraction": {
+          "value": null,
+          "status": "cell_specific_from_charge_policy"
+        },
+        "c_rate_stage2": {
+          "value": null,
+          "status": "cell_specific_from_charge_policy"
+        }
+      },
+      "discharge": {
+        "rule": "constant_current",
+        "c_rate_stage1": {
+          "value": 4.0,
+          "status": "known"
+        },
+        "c_rate_stage2": {
+          "value": null,
+          "status": "not_applicable"
+        },
+        "c_rate_stage3": {
+          "value": null,
+          "status": "not_applicable"
+        }
+      },
+      "depth_of_discharge_fraction": {
+        "value": null,
+        "status": "unknown",
+        "note": "Voltage window is known, but explicit cycling DOD fraction is not represented in the current tracked labels."
+      },
+      "cycle_normalization": {
+        "recommendation": "Use observed cycle index n and dataset-specific cycle-range metadata in the evaluation layer; do not use EOL as an input scale."
+      },
+      "eol_definition": {
+        "status": "evaluation_only",
+        "note": "Do not encode as a model input."
+      }
+    },
+    "hust_ma": {
+      "display_name": "HUST / Ma 2022",
+      "source_files": [
+        "configs/datasets.yaml",
+        "scripts/etl_hust.py",
+        "data/hust_labels/*_cycle*.json"
+      ],
+      "n_cells_inventory": 77,
+      "chemistry": "LFP / graphite",
+      "cell_model": "A123 APR18650M1A",
+      "form_factor": "18650",
+      "nominal_capacity_Ah": {
+        "value": 1.1,
+        "status": "known"
+      },
+      "voltage_window_V": {
+        "min": 2.0,
+        "max": 3.6,
+        "status": "known"
+      },
+      "temperature_C": {
+        "value": 30.0,
+        "status": "known_with_source_conflict",
+        "note": "scripts/etl_hust.py source_info says 30 C; configs/datasets.yaml says 25 C. This inventory uses ETL evidence for current feature encoding and flags the conflict for later source audit."
+      },
+      "charge": {
+        "rule": "unknown",
+        "c_rate_stage1": {
+          "value": null,
+          "status": "unknown"
+        },
+        "soc_switch_fraction": {
+          "value": null,
+          "status": "unknown"
+        },
+        "c_rate_stage2": {
+          "value": null,
+          "status": "unknown"
+        }
+      },
+      "discharge": {
+        "rule": "multi_stage_constant_current",
+        "c_rate_stage1": {
+          "value": null,
+          "status": "cell_specific_from_hust_rate_map",
+          "parser": "scripts.etl_hust.DISCHARGE_RATES"
+        },
+        "c_rate_stage2": {
+          "value": null,
+          "status": "cell_specific_from_hust_rate_map"
+        },
+        "c_rate_stage3": {
+          "value": null,
+          "status": "cell_specific_from_hust_rate_map"
+        }
+      },
+      "depth_of_discharge_fraction": {
+        "value": null,
+        "status": "unknown"
+      },
+      "cycle_normalization": {
+        "recommendation": "Use observed cycle index n; do not normalize by cycle_life/EOL in model inputs."
+      },
+      "eol_definition": {
+        "status": "evaluation_only",
+        "note": "HUST RUL/cycle_life records are labels/evaluation metadata only."
+      }
+    },
+    "calce_a123": {
+      "display_name": "CALCE A123_094",
+      "source_files": [
+        "configs/datasets.yaml",
+        "scripts/etl_calce.py",
+        "data/calce_labels/*_cycle*.json"
+      ],
+      "n_cells_inventory": 1,
+      "chemistry": "LFP / graphite",
+      "cell_model": "A123 APR26650",
+      "form_factor": "26650",
+      "nominal_capacity_Ah": {
+        "value": 2.3,
+        "status": "known"
+      },
+      "voltage_window_V": {
+        "min": 2.0,
+        "max": 3.6,
+        "status": "known"
+      },
+      "temperature_C": {
+        "value": 25.0,
+        "status": "known"
+      },
+      "charge": {
+        "rule": "constant_current",
+        "c_rate_stage1": {
+          "value": 1.0,
+          "status": "known"
+        },
+        "soc_switch_fraction": {
+          "value": null,
+          "status": "not_applicable"
+        },
+        "c_rate_stage2": {
+          "value": null,
+          "status": "not_applicable"
+        }
+      },
+      "discharge": {
+        "rule": "constant_current",
+        "c_rate_stage1": {
+          "value": 1.0,
+          "status": "known"
+        },
+        "c_rate_stage2": {
+          "value": null,
+          "status": "not_applicable"
+        },
+        "c_rate_stage3": {
+          "value": null,
+          "status": "not_applicable"
+        }
+      },
+      "depth_of_discharge_fraction": {
+        "value": null,
+        "status": "unknown"
+      },
+      "cycle_normalization": {
+        "recommendation": "External sanity-domain only; normalize capacity by nominal Ah before cross-dataset comparison."
+      },
+      "eol_definition": {
+        "status": "evaluation_only",
+        "note": "CALCE is not a full statistical benchmark in the V7 loop."
+      }
+    }
+  },
+  "missing_rate_statistics": {
+    "feature_status_counts": {
+      "known": 20,
+      "known_with_source_conflict": 1,
+      "cell_specific": 6,
+      "not_applicable": 5,
+      "unknown": 6
+    },
+    "per_dataset": {
+      "tri_severson": {
+        "unknown_physical_numeric_features": [
+          "depth_of_discharge_fraction"
+        ],
+        "unknown_rate": 0.0909,
+        "not_applicable_physical_numeric_features": [
+          "discharge_c_rate_stage2",
+          "discharge_c_rate_stage3"
+        ],
+        "cell_specific_physical_numeric_features": [
+          "charge_c_rate_stage1",
+          "charge_soc_switch_fraction",
+          "charge_c_rate_stage2"
+        ]
+      },
+      "hust_ma": {
+        "unknown_physical_numeric_features": [
+          "charge_c_rate_stage1",
+          "charge_soc_switch_fraction",
+          "charge_c_rate_stage2",
+          "depth_of_discharge_fraction"
+        ],
+        "unknown_rate": 0.3636,
+        "not_applicable_physical_numeric_features": [],
+        "cell_specific_physical_numeric_features": [
+          "discharge_c_rate_stage1",
+          "discharge_c_rate_stage2",
+          "discharge_c_rate_stage3"
+        ],
+        "source_conflict_features": [
+          "temperature_C"
+        ]
+      },
+      "calce_a123": {
+        "unknown_physical_numeric_features": [
+          "depth_of_discharge_fraction"
+        ],
+        "unknown_rate": 0.0909,
+        "not_applicable_physical_numeric_features": [
+          "charge_soc_switch_fraction",
+          "charge_c_rate_stage2",
+          "discharge_c_rate_stage2",
+          "discharge_c_rate_stage3"
+        ],
+        "cell_specific_physical_numeric_features": []
+      }
+    }
+  }
+}
