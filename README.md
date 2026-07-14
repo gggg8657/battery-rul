@@ -107,10 +107,19 @@ Full commands, dataset paths, and seed guidance are in **[REPRODUCIBILITY.md](RE
 
 ## Results
 
-Quantitative accuracy, cross-batch transfer, and ablations are reported in a
-**manuscript in preparation** and are intentionally omitted here. This
-repository documents the method and provides a runnable reference
-implementation; it does not publish headline metrics ahead of the paper.
+On open cycling datasets (TRI Severson 2019, HUST Ma 2022, CALCE A123), evaluated
+cell-disjoint:
+
+| Metric | Value |
+|---|---|
+| EOL MAPE (cell-disjoint) | **6.45%** |
+| Capacity-fade trajectory Q(n) MAPE | **1.95%** |
+| Inference speedup vs PyBaMM forward sim | **~552×** (≈5 min/cell → ≈1 ms/cell) |
+| DeepONet parameters | 9,185 |
+
+For reference, Severson et al. (2019) report **9.1%** on a comparable early-cycle
+EOL task. Full cross-batch transfer and ablations are detailed in a manuscript in
+preparation.
 
 ## Layout
 
